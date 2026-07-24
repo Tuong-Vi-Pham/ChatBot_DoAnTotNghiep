@@ -1,0 +1,163 @@
+[
+  {
+    "id": "Q_001",
+    "query": "What is the total budget for the project?",
+    "ground_truth_answer": "The total budget is 500,000,000 VND.",
+    "ground_truth_id": 1,
+    "category": "Formal",
+    "type": "direct"
+  },
+  {
+    "id": "Q_002",
+    "query": "Who is the Project Manager?",
+    "ground_truth_answer": "Nguyen Van A is the Project Manager.",
+    "ground_truth_id": 2,
+    "category": "Formal",
+    "type": "direct"
+  },
+  {
+    "id": "Q_003",
+    "query": "total budget for smartlogi is how much",
+    "ground_truth_answer": "The total budget is 500,000,000 VND.",
+    "ground_truth_id": 11,
+    "category": "Informal",
+    "type": "direct"
+  },
+  {
+    "id": "Q_004",
+    "query": "who is the big boss of this project",
+    "ground_truth_answer": "Nguyen Van A is the Project Manager.",
+    "ground_truth_id": 12,
+    "category": "Informal",
+    "type": "direct"
+  },
+  {
+    "id": "Q_005",
+    "query": "If we hire one more tester, how will the team structure change?",
+    "ground_truth_answer": "The team would have 2 testers. Currently, it has 1 PM, 1 BA, 2 Devs, and 1 Tester, running on AWS and Google Maps API.",
+    "ground_truth_id": 31,
+    "category": "Reference",
+    "type": "direct"
+  },
+  {
+    "id": "Q_006",
+    "query": "What happens to the timeline if the AI module takes 2 months longer?",
+    "ground_truth_answer": "The end date might shift past Oct 31, 2026. The AI module is key to the 20% delivery reduction goal.",
+    "ground_truth_id": 32,
+    "category": "Reference",
+    "type": "direct"
+  },
+  {
+    "id": "Q_007",
+    "query": "Summarize the human resources and the technical stack of this project.",
+    "ground_truth_answer": "The team would have 2 testers. Currently, it has 1 PM, 1 BA, 2 Devs, and 1 Tester, running on AWS and Google Maps API.",
+    "ground_truth_id": 36,
+    "category": "Synthesis",
+    "type": "direct"
+  },
+  {
+    "id": "Q_008",
+    "query": "Evaluate the relationship between the AI module and the success criteria.",
+    "ground_truth_answer": "The end date might shift past Oct 31, 2026. The AI module is key to the 20% delivery reduction goal.",
+    "ground_truth_id": 37,
+    "category": "Synthesis",
+    "type": "direct"
+  },
+  {
+    "id": "Q_009",
+    "query": "smartlogi budgt how much",
+    "ground_truth_answer": "The total budget is 500,000,000 VND.",
+    "ground_truth_id": 21,
+    "category": "Typo",
+    "type": "direct"
+  },
+  {
+    "id": "Q_010",
+    "query": "who is pm of smatlogi",
+    "ground_truth_answer": "Nguyen Van A is the Project Manager.",
+    "ground_truth_id": 22,
+    "category": "Typo",
+    "type": "direct"
+  },
+  {
+    "id": "Q_011",
+    "query": "how does onboarding work",
+    "ground_truth_answer": "The total budget is 500,000,000 VND.",
+    "ground_truth_id": 1,
+    "category": "Formal",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_012",
+    "query": "smartlogi budgt how much",
+    "ground_truth_answer": "The total budget is 500,000,000 VND.",
+    "ground_truth_id": 1,
+    "category": "Formal",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_013",
+    "query": "where is release doc",
+    "ground_truth_answer": "Le Van C is the Lead Developer, responsible for Architecture, Backend, and AI integration.",
+    "ground_truth_id": 56,
+    "category": "Informal",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_014",
+    "query": "who is manager",
+    "ground_truth_answer": "Nguyen Van A is the Project Manager.",
+    "ground_truth_id": 2,
+    "category": "Formal",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_015",
+    "query": "smartlogi technology stack",
+    "ground_truth_answer": "The project ends on October 31, 2026.",
+    "ground_truth_id": 3,
+    "category": "Formal",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_016",
+    "query": "qa test environment link",
+    "ground_truth_answer": "There are 2 Developers in a team of 5 members.",
+    "ground_truth_id": 24,
+    "category": "Typo",
+    "type": "rephrased"
+  },
+  {
+    "id": "Q_017",
+    "query": "onboarding",
+    "clarified_options": [
+      "What are the key steps outlined in our software project's onboarding documentation for new team members?",
+      "Can you identify any specific user training modules mentioned within our current system requirements document that pertain to product onboarding processes?",
+      "Are there established testing protocols detailed in our test plan documents related to the effectiveness and efficiency of end-user software onboarding procedures?"
+    ],
+    "type": "ambiguous",
+    "category": "Ambiguity"
+  },
+  {
+    "id": "Q_018",
+    "query": "search order feature",
+    "clarified_options": [
+      "[Understanding the functionality of search within an e-commerce platform]",
+      "[Implementing a keyword filtering system for orders in inventory management software]",
+      "[Optimizing order retrieval performance on customer relationship management (CRM) systems]"
+    ],
+    "type": "ambiguous",
+    "category": "Ambiguity"
+  },
+  {
+    "id": "Q_019",
+    "query": "testing guidelines",
+    "clarified_options": [
+      "QA environment setup and credentials",
+      "Unit testing framework and commands",
+      "User acceptance testing (UAT) templates"
+    ],
+    "type": "ambiguous",
+    "category": "Ambiguity"
+  }
+]

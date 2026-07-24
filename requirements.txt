@@ -1,0 +1,31 @@
+# Data Loading & Text Extraction
+pandas>=2.0.0
+openpyxl>=3.1.0
+python-docx>=0.8.11
+pypdf>=3.9.0
+pymupdf>=1.22.0  # PyMuPDF is used to render scanned PDFs into images for OCR
+paddlepaddle>=2.5.0
+paddleocr>=2.6.0
+
+# Preprocessing & Chunking
+langchain-text-splitters>=0.0.1
+
+# Vector DB & Embeddings
+sentence-transformers>=2.2.2
+chromadb>=0.4.15
+numpy>=1.22.0
+
+# LLM Interface
+openai>=1.0.0
+requests>=2.31.0
+
+# User Interfaces
+streamlit>=1.25.0
+
+# Evaluation
+rouge-score>=0.1.2
+nltk>=3.8.1
+bert-score>=0.3.13
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
