@@ -1,2 +1,0 @@
-teét hahahahaha
-umbrela
