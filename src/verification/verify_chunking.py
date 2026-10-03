@@ -9,7 +9,7 @@ from src.loaders.document_loader import DocumentLoader
 from src.chunking.splitter import DocumentSplitter
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     faq_path = os.path.join(base_dir, "data/questions/Dataset_QandA.xlsx")
     docs_dir = os.path.join(base_dir, "data/documents/Tech_Team")
     

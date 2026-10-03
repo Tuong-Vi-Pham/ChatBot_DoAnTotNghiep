@@ -5,7 +5,7 @@ class LLMClient:
     Client interface for interacting with the local LM Studio instance.
     Implements standard OpenAI compatible chat completions.
     """
-    def __init__(self, base_url: str = "http://localhost:1234/v1", default_model: str = "phi-3.5-mini-instruct"):
+    def __init__(self, base_url: str = "http://localhost:1234/v1", default_model: str = "qwen-3-14B-instruct") -> None:
         self.base_url = base_url
         self.default_model = default_model
         # Initialize OpenAI client pointing to LM Studio local port

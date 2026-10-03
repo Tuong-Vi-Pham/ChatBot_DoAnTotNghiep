@@ -11,7 +11,7 @@ from src.embeddings.embedder import Embedder
 from src.vectordb.database import VectorDBManager
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     faq_path = os.path.join(base_dir, "data/questions/Dataset_QandA.xlsx")
     docs_dir = os.path.join(base_dir, "data/documents/Tech_Team")
     db_path = os.path.join(base_dir, "chroma_db")
@@ -39,7 +39,7 @@ def main():
             documents = doc_loader.load_directory(docs_dir)
             all_docs = faq_docs + documents
             
-            splitter = DocumentSplitter(chunk_size=500, chunk_overlap=50)
+            splitter = DocumentSplitter(chunk_size=800, chunk_overlap=150)
             chunks = splitter.split_documents(all_docs, print_stats=False)
             
             faq_chunks = [c for c in chunks if c.metadata.get("source_type") == "faq"]

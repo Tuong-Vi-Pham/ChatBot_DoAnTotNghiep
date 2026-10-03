@@ -1,10 +1,7 @@
 import torch  # Critical: Import torch first to avoid shm.dll conflicts on Windows CPU
 import os
 import tempfile
-from typing import List, Optional
-import fitz  # PyMuPDF
-import docx
-from paddleocr import PaddleOCR
+from typing import List, Optional, Any
 from src.loaders.document import Document
 
 class DocumentLoader:
@@ -13,16 +10,20 @@ class DocumentLoader:
     Utilizes PaddleOCR for image OCR and scanned PDF pages.
     """
     def __init__(self, show_ocr_log: bool = False):
-        self._ocr: Optional[PaddleOCR] = None
+        self._ocr: Optional[Any] = None
         self.show_ocr_log = show_ocr_log
 
-    def _get_ocr_engine(self) -> PaddleOCR:
+    def _get_ocr_engine(self) -> Any:
         """
         Lazy initializer for PaddleOCR to avoid loading it in memory unless needed.
         """
         if self._ocr is None:
-            # Initialize PaddleOCR with English language model
-            self._ocr = PaddleOCR(lang='en')
+            try:
+                from paddleocr import PaddleOCR
+                self._ocr = PaddleOCR(lang='en')
+            except ImportError:
+                print("[DocumentLoader Warning] paddleocr module not found; OCR fallback disabled.")
+                return None
         return self._ocr
 
     def load_txt(self, file_path: str) -> str:
@@ -32,6 +33,12 @@ class DocumentLoader:
 
     def load_docx(self, file_path: str) -> str:
         """Extract text from DOCX files, including paragraphs and tables."""
+        try:
+            import docx
+        except ImportError:
+            print("[DocumentLoader Warning] python-docx module not found.")
+            return ""
+
         doc = docx.Document(file_path)
         content_parts = []
         
@@ -70,6 +77,12 @@ class DocumentLoader:
         First attempts native text extraction. If text is insufficient or empty
         (indicating a scanned PDF), renders each page to an image and runs PaddleOCR.
         """
+        try:
+            import fitz
+        except ImportError:
+            print("[DocumentLoader Warning] PyMuPDF (fitz) module not found.")
+            return ""
+
         doc = fitz.open(file_path)
         native_text_parts = []
         
@@ -113,10 +126,15 @@ class DocumentLoader:
                     
         return "\n\n".join(ocr_text_parts)
 
-    def load_file(self, file_path: str) -> Optional[Document]:
+    def load_file(self, file_path: str, base_dir: Optional[str] = None) -> Optional[Document]:
         """
         Detect file extension and load text, returning a structured Document object.
         """
+        filename = os.path.basename(file_path)
+        # Skip temporary Office lock files (~$) and hidden files (.)
+        if filename.startswith('~$') or filename.startswith('.'):
+            return None
+
         ext = os.path.splitext(file_path)[1].lower()
         if ext not in {'.pdf', '.docx', '.txt', '.png', '.jpg', '.jpeg'}:
             return None
@@ -137,14 +155,27 @@ class DocumentLoader:
             if not text:
                 return None
                 
-            # Derive category from subfolder path if possible
+            # Derive category and relative_path
             parent_dir = os.path.basename(os.path.dirname(file_path))
+            if base_dir:
+                try:
+                    rel_path = os.path.relpath(file_path, base_dir)
+                except ValueError:
+                    rel_path = file_path
+            else:
+                rel_path = file_path
+
+            # Normalize path slashes to forward slashes for consistent hashing/IDs across OS
+            rel_path_norm = rel_path.replace('\\', '/')
             
             metadata = {
                 "source_type": "document",
                 "category": parent_dir,
-                "source": os.path.basename(file_path),
-                "full_path": file_path
+                "source": filename,
+                "file_name": filename,
+                "full_path": os.path.abspath(file_path),
+                "relative_path": rel_path_norm,
+                "document_type": ext.lstrip('.')
             }
             
             return Document(page_content=text, metadata=metadata)
@@ -152,15 +183,18 @@ class DocumentLoader:
             print(f"Error loading file {file_path}: {e}")
             return None
 
-    def load_directory(self, dir_path: str) -> List[Document]:
+    def load_directory(self, dir_path: str, base_dir: Optional[str] = None) -> List[Document]:
         """
         Traverse directory recursively to load all supported documents.
         """
         documents = []
+        effective_base = base_dir if base_dir is not None else dir_path
         for root, _, files in os.walk(dir_path):
-            for file in files:
+            for file in sorted(files):
+                if file.startswith('~$') or file.startswith('.'):
+                    continue
                 file_path = os.path.join(root, file)
-                doc = self.load_file(file_path)
+                doc = self.load_file(file_path, base_dir=effective_base)
                 if doc:
                     documents.append(doc)
         return documents

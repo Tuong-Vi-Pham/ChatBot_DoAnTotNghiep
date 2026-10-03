@@ -33,7 +33,7 @@ def test_query(pipeline: RAGPipeline, query: str):
     print("-" * 50)
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     db_path = os.path.join(base_dir, "chroma_db")
     
     print("=========================================")

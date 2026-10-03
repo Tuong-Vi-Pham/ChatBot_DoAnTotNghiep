@@ -13,17 +13,35 @@ class VerificationLoop:
             "Please rephrase your question or provide more context."
         )
 
-    def check_adequacy(self, results: List[Dict[str, Any]], score_threshold: float = 0.40) -> bool:
+    def check_adequacy(
+        self, 
+        results: List[Dict[str, Any]], 
+        score_threshold: float = 0.40,
+        reranker_threshold: Optional[float] = None
+    ) -> bool:
         """
         Pre-inference check: verifies if any retrieved chunk meets the minimum similarity score.
-        If all scores are below the threshold, the evidence is deemed inadequate.
+        Explicitly uses vector retrieval_score for similarity threshold validation (e.g. 0.40),
+        preventing raw reranker CrossEncoder logits from being miscompared against cosine threshold.
         """
         if not results:
             return False
             
-        # Check if the highest retrieval score meets the threshold
-        max_score = max(item["score"] for item in results)
-        return max_score >= score_threshold
+        # Check if the highest vector retrieval score meets the similarity threshold
+        max_retrieval_score = max(item.get("retrieval_score", item.get("score", 0.0)) for item in results)
+        if max_retrieval_score < score_threshold:
+            return False
+
+        # Optional reranker logit threshold validation if specified
+        if reranker_threshold is not None:
+            max_rerank_score = max(
+                (item["rerank_score"] for item in results if item.get("rerank_score") is not None),
+                default=None
+            )
+            if max_rerank_score is not None and max_rerank_score < reranker_threshold:
+                return False
+
+        return True
 
     def verify_grounding(self, context: str, answer: str) -> bool:
         """

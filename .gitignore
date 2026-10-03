@@ -16,6 +16,12 @@ ENV/
 .mypy_cache/
 .ruff_cache/
 .hypothesis/
+.cache/
+.matplotlib/
+
+# Downloaded NLP/model data
+nltk_data/
+.nltk_data/
 
 # Jupyter / notebooks
 .ipynb_checkpoints/
@@ -25,6 +31,11 @@ ENV/
 .env.*
 *.env
 secrets.json
+*.secret
+*.key
+*.pem
+credentials.json
+*_credentials.json
 
 # VS Code / IDE
 .vscode/
@@ -35,10 +46,14 @@ chroma_db/
 *.sqlite3
 *.db
 
+# Restricted project documents
+data/documents/CRM/
+
 # Logs and temporary files
 *.log
 *.tmp
 *.temp
+~$*
 
 # Build / packaging artifacts
 build/

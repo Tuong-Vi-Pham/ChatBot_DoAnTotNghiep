@@ -12,7 +12,7 @@ from src.vectordb.database import VectorDBManager
 from src.retrieval.hybrid import HybridRetriever
 from src.llm.client import LLMClient
 from src.pipeline.rag_pipeline import RAGPipeline
-from src.intent_clarification.clarifier import IntentClarifier
+from src.intent_clarification.clarifier import IntentClarifier, reconstruct_query
 
 # Set up Streamlit Page Configuration
 st.set_page_config(
@@ -50,45 +50,51 @@ st.markdown("""
         margin-bottom: 2rem;
     }
 
-    /* Glassmorphism containers */
+    /* Glassmorphism containers & source boxes */
     .source-box {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 15px;
+        background: rgba(30, 41, 59, 0.6);
+        border-left: 4px solid #4D96FF;
+        border-radius: 8px;
+        padding: 12px 16px;
         margin-top: 10px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
     
     .source-title {
         font-weight: 600;
-        color: #4D96FF;
-        margin-bottom: 5px;
+        color: #63B3ED;
+        margin-bottom: 6px;
         font-size: 0.95rem;
     }
     
     .source-meta {
-        font-size: 0.8rem;
-        color: #718096;
+        font-size: 0.82rem;
+        color: #A0AEC0;
     }
     
-    /* Custom chat bubbles */
-    .user-bubble {
-        background-color: #2D3748;
-        border-radius: 15px 15px 0px 15px;
-        padding: 15px;
-        margin-bottom: 10px;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    .badge-tag {
+        background: rgba(77, 150, 255, 0.2);
+        color: #63B3ED;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 6px;
     }
     
-    .assistant-bubble {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border-radius: 15px 15px 15px 0px;
-        padding: 15px;
-        margin-bottom: 10px;
-        color: #F7FAFC;
-        border: 1px solid rgba(77, 150, 255, 0.2);
+    .badge-score {
+        background: rgba(72, 187, 120, 0.2);
+        color: #68D391;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Section divider */
+    .chat-section-divider {
+        border-top: 1px dashed rgba(255, 255, 255, 0.15);
+        margin: 15px 0 10px 0;
     }
 
     /* Option button styles */
@@ -113,9 +119,15 @@ st.markdown("""
 # -----------------------------------------------------------------------------
 # Lazy Initialization of Backend Components using session_state
 # -----------------------------------------------------------------------------
+need_init = False
 if "embedder" not in st.session_state:
-    with st.spinner("Loading embedding models..."):
-        st.session_state.embedder = Embedder()
+    need_init = True
+elif getattr(st.session_state.embedder, "model_name", "") != "BAAI/bge-m3":
+    need_init = True
+
+if need_init:
+    with st.spinner("Loading BAAI/bge-m3 embedding model & vector DB..."):
+        st.session_state.embedder = Embedder(model_name="BAAI/bge-m3")
         st.session_state.db_manager = VectorDBManager(embedder=st.session_state.embedder)
         st.session_state.retriever = HybridRetriever(
             db_manager=st.session_state.db_manager, 
@@ -189,22 +201,33 @@ for msg in st.session_state.messages:
         
         # Display sources if assistant message has them
         if msg["role"] == "assistant" and "sources" in msg and msg["sources"]:
-            with st.expander("🔍 View References"):
-                st.markdown(f"**Retrieval Source**: `{msg['retrieved_from'].upper()}`")
+            with st.expander("References & Citations"):
+                st.markdown(f"Retrieval Source: `{msg.get('retrieved_from', 'document').upper()}`")
                 for i, src in enumerate(msg["sources"]):
+                    score_val = src.get("score")
+                    score_html = f"<span class='badge-score'>Similarity: {score_val:.4f}</span>" if score_val is not None else ""
+                    
                     if src.get("type") == "faq":
                         st.markdown(
                             f"<div class='source-box'>"
                             f"<div class='source-title'>[{i+1}] FAQ: {src.get('source')}</div>"
-                            f"<div class='source-meta'>Category: {src.get('category')} | Cosine Similarity: {src.get('score'):.4f}</div>"
+                            f"<div class='source-meta'>"
+                            f"<span class='badge-tag'>FAQ</span>"
+                            f"Category: `{src.get('category')}` {score_html}"
+                            f"</div>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
                     else:
+                        chunk_idx = src.get('chunk_index', 0)
+                        tot_chunks = src.get('total_chunks', 1)
                         st.markdown(
                             f"<div class='source-box'>"
-                            f"<div class='source-title'>[{i+1}] File: {src.get('source')} (Chunk {src.get('chunk_index')+1}/{src.get('total_chunks')})</div>"
-                            f"<div class='source-meta'>Category: {src.get('category')} | Cosine Similarity: {src.get('score'):.4f}</div>"
+                            f"<div class='source-title'>[{i+1}] File: {src.get('source')}</div>"
+                            f"<div class='source-meta'>"
+                            f"<span class='badge-tag'>Chunk {chunk_idx+1}/{tot_chunks}</span>"
+                            f"Category: `{src.get('category', 'General')}` | Section: `{src.get('section', 'General')}` {score_html}"
+                            f"</div>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
@@ -218,20 +241,25 @@ if st.session_state.awaiting_clarification:
     # Render buttons for each option
     for idx, opt in enumerate(st.session_state.clarification_options):
         if st.button(f"Option {idx+1}: {opt}", key=f"opt_{idx}"):
-            # User selected an option, clear state and run pipeline
-            selected_query = opt
+            if "selected_options" not in st.session_state:
+                st.session_state.selected_options = []
+            if opt not in st.session_state.selected_options:
+                st.session_state.selected_options.append(opt)
+
+            reconstructed = reconstruct_query(st.session_state.original_query, st.session_state.selected_options)
             st.session_state.awaiting_clarification = False
             
             # Display user's selection in chat
-            st.session_state.messages.append({"role": "user", "content": f"Clarified to: *{selected_query}*"})
+            st.session_state.messages.append({"role": "user", "content": f"Clarified to: {opt}"})
             
-            # Generate RAG response
+            # Generate RAG response with reconstructed query and chat_id context
             with st.spinner("Querying knowledge base..."):
                 response = st.session_state.pipeline.run(
-                    query=selected_query,
+                    query=reconstructed,
                     faq_threshold=faq_threshold,
                     top_k=top_k,
-                    temperature=temperature
+                    temperature=temperature,
+                    chat_id=st.session_state.chat_id
                 )
                 
             # Store response
@@ -245,6 +273,7 @@ if st.session_state.awaiting_clarification:
             
     if st.button("❌ Cancel clarification", key="cancel_clarify"):
         st.session_state.awaiting_clarification = False
+        st.session_state.selected_options = []
         st.session_state.messages.append({"role": "assistant", "content": "Clarification cancelled. Please ask your question again."})
         st.rerun()
 
@@ -264,24 +293,26 @@ else:
             })
             st.rerun()
             
-        # Run Ambiguity Analysis
+        # Run Ambiguity Analysis with KB retriever grounding
         with st.spinner("Analyzing intent..."):
-            clarify_result = st.session_state.clarifier.check_ambiguity(prompt)
+            clarify_result = st.session_state.clarifier.check_ambiguity(prompt, retriever=st.session_state.retriever)
             
-        if clarify_result["is_ambiguous"]:
+        if clarify_result["is_ambiguous"] and len(clarify_result.get("options", [])) >= 1:
             # Pause flow and trigger clarification options
             st.session_state.awaiting_clarification = True
             st.session_state.clarification_options = clarify_result["options"]
+            st.session_state.selected_options = []
             st.session_state.original_query = prompt
             st.rerun()
         else:
-            # Query is clear, run direct RAG Pipeline
+            # Query is clear, run direct RAG Pipeline with chat_id context
             with st.spinner("Generating answer..."):
                 response = st.session_state.pipeline.run(
                     query=prompt,
                     faq_threshold=faq_threshold,
                     top_k=top_k,
-                    temperature=temperature
+                    temperature=temperature,
+                    chat_id=st.session_state.chat_id
                 )
                 
             # Append Assistant response

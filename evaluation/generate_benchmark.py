@@ -7,7 +7,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     faq_path = os.path.join(base_dir, "data/questions/Dataset_QandA.xlsx")
     output_path = os.path.join(base_dir, "evaluation/benchmark_queries.json")
     

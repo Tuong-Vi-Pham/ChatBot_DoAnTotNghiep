@@ -8,7 +8,7 @@ from src.loaders.faq_loader import FAQLoader
 from src.loaders.document_loader import DocumentLoader
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     faq_path = os.path.join(base_dir, "data/questions/Dataset_QandA.xlsx")
     docs_dir = os.path.join(base_dir, "data/documents/Tech_Team")
     

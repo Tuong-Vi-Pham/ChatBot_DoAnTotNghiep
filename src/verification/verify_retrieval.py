@@ -26,7 +26,7 @@ def test_query(retriever: HybridRetriever, query: str, faq_threshold: float = 0.
         print(f"    Content Preview:  {content_preview}...")
 
 def main():
-    base_dir = "c:/Users/hp/OneDrive/Uit/HK2_2025_2026/DoAnTotNghiep/faq-chatbot-tech-team"
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     db_path = os.path.join(base_dir, "chroma_db")
     
     print("=========================================")
